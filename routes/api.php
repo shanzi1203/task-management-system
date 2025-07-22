@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\TaskController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::middleware(['log.execution'])->group(function(){
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -19,3 +20,4 @@ Route::put('/tasks/{id}/assign', [TaskController::class, 'assign']); // Assign t
 });
 Route::put('/tasks/{id}/complete', [TaskController::class, 'complete']); // Complete task
 Route::get('/tasks', [TaskController::class, 'index']);             // List tasks
+});
