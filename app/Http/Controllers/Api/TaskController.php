@@ -7,27 +7,23 @@ use App\Http\Resources\TaskResource;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Jobs\SendTaskAssignedEmail;
+use App\Services\TaskService;
 
 
 class TaskController extends Controller
 {
+    protected $taskService;
+
+    public function __construct(TaskService $taskService)
+    {
+    $this->taskService=$taskService; 
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = Task::query();
-
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->has('assigned_to')) {
-            $query->where('assigned_to', $request->assigned_to);
-        }
-
-        $tasks = $query->with('assignee')->latest()->get();
-
+        $tasks = $this->taskService->listTask($request);
         return TaskResource::collection($tasks);
     }
 
@@ -37,32 +33,14 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        $task = Task::create([
-        ...$request->validate([
-            'title' => 'required|string',
-            'description' => 'nullable|string',
-            'status' => 'nullable|in:pending,completed,expired',
-            'due_date' => 'nullable|date|after_or_equal:today',
-        ]),
-        'status' => $request->input('status', 'pending'),
-    ]);
-
+        $task =$this->taskService->createTask($request);
         return new TaskResource($task);
     }
-   
+
     //Assign a task to a user
     public function assign($id, Request $request)
     {
-        $request->validate([
-            'assigned_to' => 'required|exists:users,id',
-        ]);
-
-        $task = Task::findOrFail($id);
-        $task->assigned_to = $request->assigned_to;
-        $task->save();
-
-        SendTaskAssignedEmail::dispatch($task);
-
+        $task = $this->taskService->assignTask($id, $request);
         return response()->json([
             'message' => 'Task assigned successfully.',
             'task' => new TaskResource($task),
@@ -73,9 +51,8 @@ class TaskController extends Controller
 
     public function complete($id)
     {
-        $task = Task::findOrFail($id);
-        $task->status = 'completed';
-        $task->save();
+        $task = $this->taskService->completeTask($id);
+        
         return response()->json([
             'message' => 'Task marked as completed',
             'task' => new TaskResource($task),
