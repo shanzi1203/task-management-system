@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TaskResource;
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Jobs\SendTaskAssignedEmail;
+
 
 class TaskController extends Controller
 {
@@ -58,6 +60,8 @@ class TaskController extends Controller
         $task = Task::findOrFail($id);
         $task->assigned_to = $request->assigned_to;
         $task->save();
+
+        SendTaskAssignedEmail::dispatch($task);
 
         return response()->json([
             'message' => 'Task assigned successfully.',
