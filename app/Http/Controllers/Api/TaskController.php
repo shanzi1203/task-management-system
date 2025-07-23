@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Jobs\SendTaskAssignedEmail;
 use App\Services\TaskService;
+use App\Events\TaskCompleted;
+
 
 
 class TaskController extends Controller
@@ -52,7 +54,9 @@ class TaskController extends Controller
     public function complete($id)
     {
         $task = $this->taskService->completeTask($id);
-        
+
+        event(new TaskCompleted($task));
+             
         return response()->json([
             'message' => 'Task marked as completed',
             'task' => new TaskResource($task),
