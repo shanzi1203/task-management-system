@@ -49,10 +49,10 @@ class TaskService
             throw new \Exception('Task is already assigned to a user.');
         }
 
-        if ($task->status !== 'pending') {
+        if ($task->status !== Task::STATUS_PENDING) {
             throw new \Exception('Only pending tasks can be assigned.');
         }
-        
+
         $task->assigned_to = $request->assigned_to;
         $task->save();
 
@@ -62,7 +62,7 @@ class TaskService
     public function completeTask($id)
     {
         $task = Task::findOrFail($id);
-        if ($task->status !== 'pending'){
+        if ($task->status !== Task::STATUS_PENDING) {
             throw new \Exception('Only pending tasks can be marked as completed.');
         }
         if (is_null($task->assigned_to)) {

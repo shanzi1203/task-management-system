@@ -28,9 +28,9 @@ class ExpireOverdueTasks extends Command
      */
     public function handle()
     {
-        $count = Task::where('status', 'pending')
+        $count = Task::where('status', Task::STATUS_PENDING)
             ->whereDate('due_date', '<', Carbon::today())
-            ->update(['status' => 'expired']);
+            ->update(['status' => Task::STATUS_EXPIRED]);
 
         $this->info("{$count} task(s) marked as expired.");
     }

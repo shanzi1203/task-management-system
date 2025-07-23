@@ -11,6 +11,10 @@ class Task extends Model
 use HasFactory;
 protected $fillable=['title','description','assigned_to','status','due_date'];
 
+const STATUS_PENDING = 'pending';
+const STATUS_COMPLETED = 'completed';
+const STATUS_EXPIRED = 'expired';
+
 public function assignee() :BelongsTo
 {
 return $this->belongsTo(User::class,'assigned_to');
