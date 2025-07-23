@@ -53,6 +53,13 @@ class TaskService
     public function completeTask($id)
     {
         $task = Task::findOrFail($id);
+        if ($task->status !== 'pending'){
+            throw new \Exception('Only pending tasks can be marked as completed.');
+        }
+        if (is_null($task->assigned_to)) {
+            throw new \Exception('Task must be assigned before it can be completed.');
+        }
+
         $task->status = 'completed';
         $task->save();
         return $task;
