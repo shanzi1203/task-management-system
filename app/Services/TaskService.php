@@ -44,6 +44,15 @@ class TaskService
         ]);
 
         $task = Task::findOrFail($id);
+
+        if (!is_null($task->assigned_to)) {
+            throw new \Exception('Task is already assigned to a user.');
+        }
+
+        if ($task->status !== 'pending') {
+            throw new \Exception('Only pending tasks can be assigned.');
+        }
+        
         $task->assigned_to = $request->assigned_to;
         $task->save();
 
